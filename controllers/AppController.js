@@ -1,7 +1,8 @@
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
-console.log(dbClient)
-console.log(redisClient)
+
+console.log(dbClient);
+console.log(redisClient);
 const getStatus = (req, res) => {
   res.send(
     {
