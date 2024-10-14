@@ -17,7 +17,7 @@ const getStats = (req, res) => {
   });
 };
 
-export default {
+module.exports = {
   getStatus,
   getStats,
 };
