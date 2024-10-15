@@ -1,5 +1,5 @@
-import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
+const dbClient = require('../utils/db').default;
+const redisClient = require('../utils/redis').default;
 
 const getStatus = (req, res) => {
   res.send(
