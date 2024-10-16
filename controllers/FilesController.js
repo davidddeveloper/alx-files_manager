@@ -161,8 +161,74 @@ const getIndex = (req, res) => {
   return null;
 };
 
+const putPublish = (req, res) => {
+  const token = req.headers['x-token'];
+  if (!token) {
+    return res.status(401).send({ error: 'Unauthorized' });
+  }
+
+  const key = `auth_${token}`;
+  redisClient.get(key).then((userId) => {
+    if (!userId) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+
+    const { id } = req.params;
+    return dbClient.client.db('files_manager').collection('files').findOne({ _id: new ObjectId(id), userId: new ObjectId(userId) }, (err, file) => {
+      if (err) {
+        return res.status(500).send({ error: 'Internal error' });
+      }
+      if (!file) {
+        return res.status(404).send({ error: 'Not found' });
+      }
+
+      return dbClient.client.db('files_manager').collection('files').updateOne({ _id: new ObjectId(id) }, { $set: { isPublic: true } }, (err, fileUpdated) => {
+        if (err) {
+          return res.status(500).send({ error: 'Internal error' });
+        }
+        return res.status(200).send(fileUpdated);
+      });
+    });
+  }).catch(() => res.status(500).send({ error: 'Internal error' }));
+  return null;
+};
+
+const putUnpublish = (req, res) => {
+  const token = req.headers['x-token'];
+  if (!token) {
+    return res.status(401).send({ error: 'Unauthorized' });
+  }
+
+  const key = `auth_${token}`;
+  redisClient.get(key).then((userId) => {
+    if (!userId) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+
+    const { id } = req.params;
+    return dbClient.client.db('files_manager').collection('files').findOne({ _id: new ObjectId(id), userId: new ObjectId(userId) }, (err, file) => {
+      if (err) {
+        return res.status(500).send({ error: 'Internal error' });
+      }
+      if (!file) {
+        return res.status(404).send({ error: 'Not found' });
+      }
+
+      return dbClient.client.db('files_manager').collection('files').updateOne({ _id: new ObjectId(id) }, { $set: { isPublic: false } }, (err, fileUpdated) => {
+        if (err) {
+          return res.status(500).send({ error: 'Internal error' });
+        }
+        return res.status(200).send(fileUpdated);
+      });
+    });
+  }).catch(() => res.status(500).send({ error: 'Internal error' }));
+  return null;
+};
+
 module.exports = {
   postUpload,
   getShow,
   getIndex,
+  putPublish,
+  putUnpublish,
 };
