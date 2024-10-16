@@ -31,20 +31,21 @@ const postUpload = (req, res) => {
       if (!body.type || !type.includes(body.type)) {
         return res.status(400).send({ error: 'Missing type' });
       }
+      console.log(body.data, body.type)
       if (!body.data && body.type !== 'folder') {
         return res.status(400).send({ error: 'Missing data' });
       }
 
       if (body.parentId !== undefined) {
         // TODO: check if file is present for this parentid
-        return dbClient.client.db('files_manager').collection('files').findOne({ _id: new ObjectId(body.parentId) }, (err, file) => {
+        return dbClient.client.db('files_manager').collection('files').findOne({ _id: new ObjectId(body.parentId) }, (err, folder) => {
           if (err) {
             return res.status(500).send({ error: 'Internal error' });
           }
-          if (!file) {
+          if (!folder) {
             return res.status(400).send({ error: 'Parent not found' });
           }
-          if (file && file.type !== 'folder') {
+          if (folder && folder.type !== 'folder') {
             return res.status(400).send({ error: 'Parent is not a folder' });
           }
           return null;
@@ -74,8 +75,8 @@ const postUpload = (req, res) => {
         userId: user._id,
         name: body.name,
         type: body.type,
-        isPublic: body.isPublic,
-        parentId: body.parentId,
+        isPublic: body.isPublic === undefined ? false : body.isPublic,
+        parentId: body.parentId === undefined ? 0 : body.parentId,
         localPath: body.type === 'file' || body.type === 'image' ? localPath : null,
       }, (err, file) => {
         if (err) {
