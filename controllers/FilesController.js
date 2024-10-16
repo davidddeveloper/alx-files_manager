@@ -90,6 +90,79 @@ const postUpload = (req, res) => {
   return null;
 };
 
+const getShow = (req, res) => {
+  const token = req.headers['x-token'];
+  if (!token) {
+    return res.status(401).send({ error: 'Unauthorized' });
+  }
+
+  const key = `auth_${token}`;
+  redisClient.get(key).then((userId) => {
+    if (!userId) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+
+    dbClient.client.db('files_manager').collection('users').findOne({ _id: new ObjectId(userId) }, (err, user) => {
+      if (err) {
+        return res.status(401).send({ error: 'Unauthorized' });
+      }
+
+      if (!user) {
+        return res.status(401).send({ error: 'Unauthorized' });
+      }
+
+      const { id } = req.params;
+      dbClient.client.db('files_manager').collection('files').find({ _id: new ObjectId(id) }).toArray((err, files) => {
+        if (err) {
+          return res.status(500).send({ error: 'Internal error' });
+        }
+        if (!files || files.length === 0) {
+          return res.status(404).send({ error: 'Not found' });
+        }
+        if (!files[0] || files[0].userId.toString() !== user._id.toString()) {
+          return res.status(404).send({ error: 'Not found' });
+        }
+        return res.status(200).send(files[0]);
+      });
+      return null;
+    });
+    return null;
+  });
+  return null;
+};
+
+const getIndex = (req, res) => {
+  const token = req.headers['x-token'];
+  if (!token) {
+    return res.status(401).send({ error: 'Unauthorized' });
+  }
+
+  const key = `auth_${token}`;
+  redisClient.get(key).then((userId) => {
+    if (!userId) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+
+    const { parentId = 0, page = 0 } = req.query;
+    const pageSize = 20;
+    const skip = parseInt(page, 10) * pageSize;
+
+    return dbClient.client.db('files_manager').collection('files').aggregate([
+      { $match: { parentId, userId: new ObjectId(userId) } },
+      { $skip: skip },
+      { $limit: pageSize },
+    ]).toArray((err, files) => {
+      if (err) {
+        return res.status(500).send({ error: 'Internal error' });
+      }
+      return res.status(200).send(files);
+    });
+  }).catch(() => res.status(500).send({ error: 'Internal error' }));
+  return null;
+};
+
 module.exports = {
   postUpload,
+  getShow,
+  getIndex,
 };
