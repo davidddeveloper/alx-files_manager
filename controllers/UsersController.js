@@ -39,7 +39,7 @@ const postNew = (req, res) => {
       console.error(err);
       return res.status(500).send({ error: 'Internal error' });
     }
-    return res.status(200).send(
+    return res.status(201).send(
       {
         email: result.ops[0].email,
         id: result.ops[0]._id,
