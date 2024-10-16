@@ -10,10 +10,10 @@ const getStatus = (req, res) => {
   );
 };
 
-const getStats = (req, res) => {
+const getStats = async (req, res) => {
   res.send({
-    users: dbClient.nbUsers(),
-    files: dbClient.nbFiles(),
+    users: await dbClient.nbUsers(),
+    files: await dbClient.nbFiles(),
   });
 };
 

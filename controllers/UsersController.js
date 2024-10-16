@@ -13,15 +13,18 @@ const postNew = (req, res) => {
     return res.status(400).send({ error: 'Missing password' });
   }
 
+  let theUser = null;
   dbClient.client.db('files_manager').collection('users').findOne({ email }, (err, user) => {
     if (err) {
       return res.status(500).send({ error: 'Internal error' });
     }
-    if (user) {
-      return res.status(400).send({ error: 'Already exist' });
-    }
+    theUser = user;
     return null;
   });
+
+  if (theUser) {
+    return res.status(400).send({ error: 'Already exist' });
+  }
 
   function hashPassword(password) {
     return crypto.createHash('sha1').update(password).digest('hex');
