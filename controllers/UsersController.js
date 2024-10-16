@@ -26,9 +26,13 @@ const postNew = (req, res) => {
     return res.status(400).send({ error: 'Already exist' });
   }
 
+  function hashPassword(password) {
+    return crypto.createHash('sha1').update(password).digest('hex');
+  }
+
   const newUser = {
     email,
-    password: crypto.createHash('sha1').update(password).digest('hex'),
+    password: hashPassword(password),
   };
   dbClient.client.db('files_manager').collection('users').insertOne(newUser, (err, result) => {
     if (err) {
