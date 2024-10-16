@@ -36,7 +36,6 @@ const postNew = (req, res) => {
   };
   dbClient.client.db('files_manager').collection('users').insertOne(newUser, (err, result) => {
     if (err) {
-      console.error(err);
       return res.status(500).send({ error: 'Internal error' });
     }
     return res.status(201).send(
