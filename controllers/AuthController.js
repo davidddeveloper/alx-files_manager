@@ -32,8 +32,7 @@ const getConnect = (req, res) => {
       }
       const token = uuidv4();
       const key = `auth_${token}`;
-      redisClient.set(key, user._id, 60 * 60 * 24).then(() => res.status(200).send({ token })).catch(() => res.status(500).send({ error: 'Internal error' }));
-      return res.status(200).send({ user });
+      return redisClient.set(key, user._id, 60 * 60 * 24).then(() => res.status(200).send({ token })).catch(() => res.status(500).send({ error: 'Internal error' }));
     });
   } catch (err) {
     return res.status(401).send({ error: 'Unauthorized' });
@@ -46,7 +45,7 @@ module.exports = {
 };
 
 const getDisconnect = (req, res) => {
-  const token = req.headers['X-Token'];
+  const token = req.headers['x-token'];
   if (!token) {
     return res.status(401).send({ error: 'Unauthorized' });
   }
@@ -65,5 +64,6 @@ const getDisconnect = (req, res) => {
 };
 
 module.exports = {
+  getConnect,
   getDisconnect,
 };
