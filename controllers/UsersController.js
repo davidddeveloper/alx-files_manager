@@ -7,7 +7,7 @@ const postNew = (req, res) => {
   const { email, password } = body;
 
   if (!email) {
-    return res.status(400).send({ error: 'email is required' });
+    return res.status(400).send({ error: 'Missing email' });
   }
   if (!password) {
     return res.status(400).send({ error: 'Missing password' });
