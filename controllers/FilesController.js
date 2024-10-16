@@ -31,7 +31,7 @@ const postUpload = (req, res) => {
       if (!body.type || !type.includes(body.type)) {
         return res.status(400).send({ error: 'Missing type' });
       }
-      console.log(body.data, body.type)
+
       if (!body.data && body.type !== 'folder') {
         return res.status(400).send({ error: 'Missing data' });
       }
