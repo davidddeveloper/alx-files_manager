@@ -1,4 +1,5 @@
 const uuid = require('uuid');
+const mime = require('mime-types');
 const fs = require('fs');
 const { ObjectId } = require('mongodb');
 const dbClient = require('../utils/db');
@@ -225,10 +226,49 @@ const putUnpublish = (req, res) => {
   return null;
 };
 
+const getFile = (req, res) => {
+  const { id } = req.params;
+  dbClient.client.db('files_manager').collection('files').findOne({ _id: new ObjectId(id) }, (err, file) => {
+    if (err) {
+      return res.status(500).send({ error: 'Internal error' });
+    }
+    if (!file) {
+      return res.status(404).send({ error: 'Not found' });
+    }
+    redisClient.get(`auth_${req.headers['x-token']}`).then((userId) => {
+      if (!file.isPublic && userId !== file.userId.toString()) {
+        return res.status(404).send({ error: 'Not found' });
+      }
+      return null;
+    })
+    if (file.type === 'folder') {
+      return res.status(400).send({ error: "A folder doesn't have content" });
+    }
+    const filePath = `${folderPath}/${file.localPath}`;
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+      if (err) {
+        return res.status(404).send({ error: 'Not found' });
+      }
+      // If file exists, continue with further processing
+      return res.status(200).send(file);
+    });
+    const mimeType = mime.lookup(file.localPath);
+    if (!mimeType) {
+      return res.status(500).send({ error: 'Internal error' });
+    }
+    res.writeHead(200, { 'Content-Type': mimeType });
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+    return res.status(200).send(file);
+  });
+  return null;
+};
+
 module.exports = {
   postUpload,
   getShow,
   getIndex,
   putPublish,
   putUnpublish,
+  getFile,
 };
