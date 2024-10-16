@@ -1,5 +1,6 @@
 const uuidv4 = require('uuid').v4;
 const crypto = require('crypto');
+const { ObjectId } = require('mongodb');
 const dbClient = require('../utils/db');
 const redisClient = require('../utils/redis');
 
@@ -54,11 +55,12 @@ const getDisconnect = (req, res) => {
     if (!userId) {
       return res.status(401).send({ error: 'Unauthorized' });
     }
-    return dbClient.client.db('files_manager').collection('users').findOne({ _id: userId }, (err, user) => {
+    return dbClient.client.db('files_manager').collection('users').findOne({ _id: new ObjectId(userId) }, (err) => {
       if (err) {
         return res.status(401).send({ error: 'Unauthorized' });
       }
-      return res.status(200).send({ email: user.email, id: user._id });
+
+      return redisClient.del(key).then(() => res.status(204).send({})).catch(() => res.status(500).send({ error: 'Internal error' }));
     });
   });
 };

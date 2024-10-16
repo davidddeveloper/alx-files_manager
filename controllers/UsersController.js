@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { ObjectId } = require('mongodb');
 const dbClient = require('../utils/db');
 const redisClient = require('../utils/redis');
 
@@ -61,8 +62,8 @@ const getMe = (req, res) => {
     if (!userId) {
       return res.status(401).send({ error: 'Unauthorized' });
     }
-
-    return dbClient.client.db('files_manager').collection('users').findOne({ _id: userId }, (err, user) => {
+    console.log('user_id', userId);
+    return dbClient.client.db('files_manager').collection('users').findOne({ _id: new ObjectId(userId) }, (err, user) => {
       if (err) {
         return res.status(401).send({ error: 'Unauthorized' });
       }
