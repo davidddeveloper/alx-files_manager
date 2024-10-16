@@ -1,4 +1,4 @@
-import { createClient } from 'redis';
+const { createClient } = require('redis');
 
 class RedisClient {
   constructor() {
@@ -61,4 +61,5 @@ class RedisClient {
 
 // Export a RedisClient instance
 const redisClient = new RedisClient();
-export default redisClient;
+
+module.exports = redisClient;

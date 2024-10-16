@@ -1,4 +1,4 @@
-import MongoClient from 'mongodb/lib/mongo_client';
+const MongoClient = require('mongodb/lib/mongo_client');
 
 class DBClient {
   constructor() {
@@ -28,4 +28,4 @@ class DBClient {
 }
 
 const dbClient = new DBClient();
-export default dbClient;
+module.exports = dbClient;
